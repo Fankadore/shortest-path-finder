@@ -57,6 +57,24 @@ checkAdjacentNodes(startNode, 1, path);
 output();
 
 
+function checkNode(nextNode, distanceFromStart, currentPath) {
+	if (nextNode === endNode) {
+		if (shortestDistance === null || distanceFromStart < shortestDistance) {
+			shortestDistance = distanceFromStart;
+			path = currentPath.map(x => x);
+		}
+		return;
+	}
+	
+	if (!walls[nextNode]) {
+		if (nodes[nextNode].distance === null || distanceFromStart < nodes[nextNode].distance) {
+			nodes[nextNode].distance = distanceFromStart;
+			checkAdjacentNodes(nextNode, distanceFromStart + 1, currentPath);
+			currentPath.pop();
+		}
+	}
+}
+
 function checkAdjacentNodes(currentNode, distanceFromStart, currentPath) {
 	currentPath.push(nodes[currentNode]);
 	
@@ -65,85 +83,25 @@ function checkAdjacentNodes(currentNode, distanceFromStart, currentPath) {
 	// Check left
 	if (currentNode % columns !== 0) {  // Only check if not on left edge
 		nextNode = currentNode - 1;
-
-		if (nextNode === endNode) {
-			if (shortestDistance === null || distanceFromStart < shortestDistance) {
-				shortestDistance = distanceFromStart;
-				path = currentPath.map(x => x);
-			}
-			return;
-		}
-		
-		if (!walls[nextNode]) {
-			if (nodes[nextNode].distance === null || distanceFromStart < nodes[nextNode].distance) {
-				nodes[nextNode].distance = distanceFromStart;
-				checkAdjacentNodes(nextNode, distanceFromStart + 1, currentPath);
-				currentPath.pop();
-			}
-		}
+		checkNode(nextNode, distanceFromStart, currentPath);
 	}
 
 	// Check up
 	if (currentNode >= columns) {  // Only check if not on top edge
 		nextNode = currentNode - columns;
-
-		if (nextNode === endNode) {
-			if (shortestDistance === null || distanceFromStart < shortestDistance) {
-				shortestDistance = distanceFromStart;
-				path = currentPath.map(x => x);
-			}
-			return;
-		}
-		
-		if (!walls[nextNode]) {
-			if (nodes[nextNode].distance === null || distanceFromStart < nodes[nextNode].distance) {
-				nodes[nextNode].distance = distanceFromStart;
-				checkAdjacentNodes(nextNode, distanceFromStart + 1, currentPath);
-				currentPath.pop();
-			}
-		}
+		checkNode(nextNode, distanceFromStart, currentPath);
 	}
 	
 	// Check right
 	if (currentNode % columns !== 11) {  // Only check if not on right edge
 		nextNode = currentNode + 1;
-
-		if (nextNode === endNode) {
-			if (shortestDistance === null || distanceFromStart < shortestDistance) {
-				shortestDistance = distanceFromStart;
-				path = currentPath.map(x => x);
-			}
-			return;
-		}
-		
-		if (!walls[nextNode]) {
-			if (nodes[nextNode].distance === null || distanceFromStart < nodes[nextNode].distance) {
-				nodes[nextNode].distance = distanceFromStart;
-				checkAdjacentNodes(nextNode, distanceFromStart + 1, currentPath);
-				currentPath.pop();
-			}
-		}
+		checkNode(nextNode, distanceFromStart, currentPath);
 	}
 	
 	// Check down
 	if (currentNode < (columns * rows) - columns) {  // Only check if not on bottom edge
 		nextNode = currentNode + columns;
-
-		if (nextNode === endNode) {
-			if (shortestDistance === null || distanceFromStart < shortestDistance) {
-				shortestDistance = distanceFromStart;
-				path = currentPath.map(x => x);
-			}
-			return;
-		}
-		
-		if (!walls[nextNode]) {
-			if (nodes[nextNode].distance === null || distanceFromStart < nodes[nextNode].distance) {
-				nodes[nextNode].distance = distanceFromStart;
-				checkAdjacentNodes(nextNode, distanceFromStart + 1, currentPath);
-				currentPath.pop();
-			}
-		}
+		checkNode(nextNode, distanceFromStart, currentPath);
 	}
 
 	return;
