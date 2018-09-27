@@ -1,40 +1,12 @@
 /** Shortest Path Finder - Ruaidhri MacKenzie 2018 **/
 /* Finds the shortest path between two nodes on a grid */
 
-const canvas = document.querySelector("#grid");
-const ctx = canvas.getContext("2d");
 const tilesize = 32;
 const columns = 12;
 const rows = 12;
-canvas.setAttribute("width", columns * tilesize);
-canvas.setAttribute("height", rows * tilesize);
-
-const nodes = [];
 const startPos = {x: 0, y: 0};
-const endPos = {x: 7, y: 9};
-const startNode = (startPos.y * columns) + startPos.x;
-const endNode = (endPos.y * columns) + endPos.x;
-
-let shortestDistance = null;
-let path = [];
-
-class Node {
-	constructor() {
-		this.id = nodes.length;
-		this.distance = null;
-		nodes.push(this);
-	}
-}
-
-// Create Nodes
-for (let y = 0; y < rows; y++) {
-	for (let x = 0; x < columns; x++) {
-		new Node();
-	}
-}
-
-// Define Walls
-walls = [
+const endPos = {x: 7, y: 0};
+const walls = [
 	0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
 	1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
 	1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
@@ -49,6 +21,29 @@ walls = [
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ];
 
+const canvas = document.querySelector("#grid");
+const ctx = canvas.getContext("2d");
+canvas.setAttribute("width", columns * tilesize);
+canvas.setAttribute("height", rows * tilesize);
+
+const startNode = (startPos.y * columns) + startPos.x;
+const endNode = (endPos.y * columns) + endPos.x;
+const nodes = [];
+let path = [];
+
+class Node {
+	constructor() {
+		this.id = nodes.length;
+		this.distance = null;
+		nodes.push(this);
+	}
+}
+
+// Create Nodes
+for (let i = 0; i < rows * columns; i++) {
+	new Node();
+}
+
 // Check for shortest path
 nodes[startNode].distance = 0;
 checkAdjacentNodes(startNode, 1, path);
@@ -59,8 +54,8 @@ output();
 
 function checkNode(nextNode, distanceFromStart, currentPath) {
 	if (nextNode === endNode) {
-		if (shortestDistance === null || distanceFromStart < shortestDistance) {
-			shortestDistance = distanceFromStart;
+		if (nodes[endNode].distance === null || distanceFromStart < nodes[endNode].distance) {
+			nodes[endNode].distance = distanceFromStart;
 			path = currentPath.map(x => x);
 		}
 		return;
@@ -77,7 +72,6 @@ function checkNode(nextNode, distanceFromStart, currentPath) {
 
 function checkAdjacentNodes(currentNode, distanceFromStart, currentPath) {
 	currentPath.push(nodes[currentNode]);
-	
 	let nextNode = null;
 
 	// Check left
@@ -85,27 +79,23 @@ function checkAdjacentNodes(currentNode, distanceFromStart, currentPath) {
 		nextNode = currentNode - 1;
 		checkNode(nextNode, distanceFromStart, currentPath);
 	}
-
 	// Check up
 	if (currentNode >= columns) {  // Only check if not on top edge
 		nextNode = currentNode - columns;
 		checkNode(nextNode, distanceFromStart, currentPath);
 	}
-	
 	// Check right
 	if (currentNode % columns !== 11) {  // Only check if not on right edge
 		nextNode = currentNode + 1;
 		checkNode(nextNode, distanceFromStart, currentPath);
 	}
-	
 	// Check down
 	if (currentNode < (columns * rows) - columns) {  // Only check if not on bottom edge
 		nextNode = currentNode + columns;
 		checkNode(nextNode, distanceFromStart, currentPath);
 	}
-
-	return;
 }
+
 
 function draw() {
 	nodes.forEach((node) => {
@@ -114,10 +104,10 @@ function draw() {
 		
 		// Highlight the path
 		if (node === nodes[startNode]) {
-			ctx.fillStyle = '#0000ff';
+			ctx.fillStyle = '#ff0000';
 		}
 		else if (path.includes(node)) {
-			ctx.fillStyle = '#ff0000';
+			ctx.fillStyle = '#ffff00';
 		}
 		else if (node === nodes[endNode]) {
 			ctx.fillStyle = '#00ff00';
@@ -133,6 +123,12 @@ function draw() {
 		// Draw Grid
 		ctx.strokeStyle = '#000000';
 		ctx.strokeRect(x * tilesize, y * tilesize, tilesize, tilesize);
+
+		// Show Distance
+		if (node.distance !== null) {
+			ctx.fillStyle = '#000000';
+			ctx.fillText(node.distance, (x * tilesize) + (tilesize / 3), (y * tilesize) + (tilesize / 2));
+		}
 	});
 }
 
