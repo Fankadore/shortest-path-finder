@@ -1,3 +1,6 @@
+/** Shortest Path Finder - Ruaidhri MacKenzie 2018 **/
+/* Finds the shortest path between two nodes on a grid */
+
 const canvas = document.querySelector("#grid");
 const ctx = canvas.getContext("2d");
 const tilesize = 32;
@@ -6,7 +9,6 @@ const rows = 12;
 canvas.setAttribute("width", columns * tilesize);
 canvas.setAttribute("height", rows * tilesize);
 
-const grid = [];
 const nodes = [];
 const startPos = {x: 0, y: 0};
 const endPos = {x: 7, y: 9};
@@ -26,9 +28,8 @@ class Node {
 
 // Create Nodes
 for (let y = 0; y < rows; y++) {
-	grid[y] = [];
 	for (let x = 0; x < columns; x++) {
-		grid[y][x] = new Node();
+		new Node();
 	}
 }
 
