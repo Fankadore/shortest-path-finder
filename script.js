@@ -26,17 +26,15 @@ const ctx = canvas.getContext("2d");
 canvas.setAttribute("width", columns * tilesize);
 canvas.setAttribute("height", rows * tilesize);
 
-const startNode = (startPos.y * columns) + startPos.x;
-const endNode = (endPos.y * columns) + endPos.x;
-const nodes = [];
+let startNode = (startPos.y * columns) + startPos.x;
+let endNode = (endPos.y * columns) + endPos.x;
 let path = [];
 
-class Node {
-	constructor() {
-		this.id = nodes.length;
-		this.distance = null;
-		nodes.push(this);
-	}
+const nodes = [];
+function Node() {
+	this.id = nodes.length;
+	this.distance = null;
+	nodes.push(this);
 }
 
 // Create Nodes
@@ -44,15 +42,69 @@ for (let i = 0; i < rows * columns; i++) {
 	new Node();
 }
 
-// Check for shortest path
-nodes[startNode].distance = 0;
-checkAdjacentNodes(startNode, 1, path);
+checkShortestPath();
 
-// Output the shortest path
-output();
+document.addEventListener("contextmenu", (e) => {
+	e.preventDefault();
+});
 
+document.addEventListener('click', (e) => {
+	let bounds = canvas.getBoundingClientRect();
+	let pixelX = e.x - bounds.left;
+	let pixelY = e.y - bounds.top;
+	let x = (pixelX - (pixelX % tilesize)) / tilesize;
+	let y = (pixelY - (pixelY % tilesize)) / tilesize;
+	if (x < 0 || x >= columns || y < 0 || y >= columns) return;
+	let index = (y * columns) + x;
 
-function checkNode(nextNode, distanceFromStart, currentPath) {
+	if (e.shiftKey) {
+		// Toggle Wall
+		if (walls[index]) {
+			walls[index] = 0;
+		}
+		else {
+			walls[index] = 1;
+		}
+		checkShortestPath();
+	}
+	else if (e.button === 0) {
+		// Set Start and End Node
+		startPos.x = endPos.x;
+		startPos.y = endPos.y;
+		endPos.x = x;
+		endPos.y = y;
+		checkShortestPath();
+	}
+	else {
+		// Set End Node
+		endPos.x = x;
+		endPos.y = y;
+		checkShortestPath();
+	}
+});
+
+function checkShortestPath() {
+	resetNodes();
+	findAdjacentNodes(startNode, 1, path);
+	output();
+}
+
+function resetNodes() {
+	startNode = (startPos.y * columns) + startPos.x;
+	endNode = (endPos.y * columns) + endPos.x;
+	path = [];
+
+	nodes.forEach((node) => {
+		if (node.id === startNode) {
+			node.distance = 0;
+		}
+		else {
+			node.distance = null;
+		}
+	});
+}
+
+function checkNextNode(nextNode, distanceFromStart, currentPath) {
 	if (nextNode === endNode) {
 		if (nodes[endNode].distance === null || distanceFromStart < nodes[endNode].distance) {
 			nodes[endNode].distance = distanceFromStart;
@@ -64,38 +116,37 @@ function checkNode(nextNode, distanceFromStart, currentPath) {
 	if (!walls[nextNode]) {
 		if (nodes[nextNode].distance === null || distanceFromStart < nodes[nextNode].distance) {
 			nodes[nextNode].distance = distanceFromStart;
-			checkAdjacentNodes(nextNode, distanceFromStart + 1, currentPath);
+			currentPath.push(nodes[nextNode]);
+			findAdjacentNodes(nextNode, distanceFromStart + 1, currentPath);
 			currentPath.pop();
 		}
 	}
 }
 
-function checkAdjacentNodes(currentNode, distanceFromStart, currentPath) {
-	currentPath.push(nodes[currentNode]);
+function findAdjacentNodes(currentNode, distanceFromStart, currentPath) {
 	let nextNode = null;
 
 	// Check left
 	if (currentNode % columns !== 0) {  // Only check if not on left edge
 		nextNode = currentNode - 1;
-		checkNode(nextNode, distanceFromStart, currentPath);
+		checkNextNode(nextNode, distanceFromStart, currentPath);
 	}
 	// Check up
 	if (currentNode >= columns) {  // Only check if not on top edge
 		nextNode = currentNode - columns;
-		checkNode(nextNode, distanceFromStart, currentPath);
+		checkNextNode(nextNode, distanceFromStart, currentPath);
 	}
 	// Check right
 	if (currentNode % columns !== 11) {  // Only check if not on right edge
 		nextNode = currentNode + 1;
-		checkNode(nextNode, distanceFromStart, currentPath);
+		checkNextNode(nextNode, distanceFromStart, currentPath);
 	}
 	// Check down
 	if (currentNode < (columns * rows) - columns) {  // Only check if not on bottom edge
 		nextNode = currentNode + columns;
-		checkNode(nextNode, distanceFromStart, currentPath);
+		checkNextNode(nextNode, distanceFromStart, currentPath);
 	}
 }
-
 
 function draw() {
 	nodes.forEach((node) => {
@@ -106,14 +157,14 @@ function draw() {
 		if (node === nodes[startNode]) {
 			ctx.fillStyle = '#ff0000';
 		}
-		else if (path.includes(node)) {
-			ctx.fillStyle = '#ffff00';
-		}
 		else if (node === nodes[endNode]) {
 			ctx.fillStyle = '#00ff00';
 		}
 		else if (walls[node.id]) {
 			ctx.fillStyle = '#000000';
+		}
+		else if (path.includes(node)) {
+			ctx.fillStyle = '#ffff00';
 		}
 		else {
 			ctx.fillStyle = '#ffffff';
@@ -127,13 +178,13 @@ function draw() {
 		// Show Distance
 		if (node.distance !== null) {
 			ctx.fillStyle = '#000000';
-			ctx.fillText(node.distance, (x * tilesize) + (tilesize / 3), (y * tilesize) + (tilesize / 2));
+			ctx.fillText(node.distance, (x * tilesize) + (tilesize / 3), (y * tilesize) + (tilesize / 2), tilesize);
 		}
 	});
 }
 
 function output() {
-	if (path.length === 0) {
+	if (nodes[endNode].distance === null) {
 		console.log("No path found.");
 	}
 	else {
@@ -144,6 +195,6 @@ function output() {
 			message += `(${x},${y}), `;
 		});
 		console.log(message);
-		draw();
 	}
+	draw();
 }
