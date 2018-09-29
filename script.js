@@ -29,8 +29,8 @@ canvas.setAttribute("height", rows * tilesize);
 let startNode = (startPos.y * columns) + startPos.x;
 let endNode = (endPos.y * columns) + endPos.x;
 let path = [];
-
 const nodes = [];
+
 function Node() {
 	this.id = nodes.length;
 	this.distance = null;
@@ -61,11 +61,17 @@ document.addEventListener('click', (e) => {
 		// Toggle Wall
 		if (walls[index]) {
 			walls[index] = 0;
+			checkShortestPath();
 		}
 		else {
-			walls[index] = 1;
+			walls[index] = 1;			
+			if (path.includes(nodes[index])) {
+				checkShortestPath();
+			}
+			else {
+				draw();
+			}
 		}
-		checkShortestPath();
 	}
 	else if (e.button === 0) {
 		// Set Start and End Node
@@ -105,16 +111,14 @@ function resetNodes() {
 }
 
 function checkNextNode(nextNode, distanceFromStart, currentPath) {
-	if (nextNode === endNode) {
-		if (nodes[endNode].distance === null || distanceFromStart < nodes[endNode].distance) {
+	if (nodes[nextNode].distance === null || distanceFromStart < nodes[nextNode].distance) {
+		if (nextNode === endNode) {
 			nodes[endNode].distance = distanceFromStart;
 			path = currentPath.map(x => x);
+			return;
 		}
-		return;
-	}
 	
-	if (!walls[nextNode]) {
-		if (nodes[nextNode].distance === null || distanceFromStart < nodes[nextNode].distance) {
+		if (!walls[nextNode]) {
 			nodes[nextNode].distance = distanceFromStart;
 			currentPath.push(nodes[nextNode]);
 			findAdjacentNodes(nextNode, distanceFromStart + 1, currentPath);
