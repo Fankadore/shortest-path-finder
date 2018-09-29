@@ -1,4 +1,4 @@
-/** Shortest Path Finder - Ruaidhri MacKenzie 2018 **/
+/** Shortest Path Finder GUI - Ruaidhri MacKenzie 2018 **/
 /* Finds the shortest path between two nodes on a grid */
 
 const tilesize = 32;
@@ -31,16 +31,11 @@ let endNode = (endPos.y * columns) + endPos.x;
 let path = [];
 const nodes = [];
 
-function Node() {
-	this.id = nodes.length;
-	this.distance = null;
-	nodes.push(this);
-}
-
-// Create Nodes
-for (let i = 0; i < rows * columns; i++) {
-	new Node();
-}
+	// Create Nodes
+	for (let i = 0; i < rows * columns; i++) {
+		nodes[i] = {id: i, distance: null};
+	}
+	nodes[startNode].distance = 0;
 
 checkShortestPath();
 
