@@ -20,106 +20,90 @@ const grid = [
 let path = pathFinder(startPos, endPos, grid);
 
 const tilesize = 32;
-const columns = grid.length;
-const rows = grid[0].length;
+const columns = grid[0].length;
+const rows = grid.length;
 const canvas = document.querySelector("#grid");
 const ctx = canvas.getContext("2d");
 canvas.setAttribute("width", columns * tilesize);
 canvas.setAttribute("height", rows * tilesize);
 
-document.addEventListener("contextmenu", (e) => e.preventDefault());
+const output = () => {
+	if (!path) {
+		console.log("No path found.");
+	}
+	else {
+		let message = "Shortest Path is: ";
+		path.forEach(node => message += `(${node.x},${node.y}), `);
+		console.log(message);
+	}
+};
+const draw = () => {
+	ctx.strokeStyle = '#000000';
+	for (let y = 0; y < rows; y++) {
+		for (let x = 0; x < columns; x++) {
+
+			// Colour the tiles
+			if (x === startPos.x && y === startPos.y) ctx.fillStyle = '#0000ff';
+			else if (x === endPos.x && y === endPos.y) ctx.fillStyle = '#ffa500';
+			else if (grid[y][x] === 1) ctx.fillStyle = '#000000';
+			else ctx.fillStyle = '#ffffff';
+			ctx.fillRect(x * tilesize, y * tilesize, tilesize, tilesize);
+			ctx.strokeRect(x * tilesize, y * tilesize, tilesize, tilesize);
+		}
+	}
+
+	// Highlight the path
+	ctx.fillStyle = '#ffff00';
+	path.forEach(node => {
+		if (node.x !== endPos.x || node.y !== endPos.y) {
+			ctx.fillRect(node.x * tilesize, node.y * tilesize, tilesize, tilesize);
+			ctx.strokeRect(node.x * tilesize, node.y * tilesize, tilesize, tilesize);
+		}
+	});
+};
+const checkShortestPath = () => {
+	path = pathFinder(startPos, endPos, grid);
+	output(path);
+	draw();
+};
+
+// Left Click
 document.addEventListener('click', (e) => {
 	const bounds = canvas.getBoundingClientRect();
 	const pixelX = e.x - bounds.left;
 	const pixelY = e.y - bounds.top;
 	const x = (pixelX - (pixelX % tilesize)) / tilesize;
 	const y = (pixelY - (pixelY % tilesize)) / tilesize;
-	if (x < 0 || x >= columns || y < 0 || y >= columns) return;
+	if (x < 0 || x >= columns || y < 0 || y >= rows) return;
 	const index = (y * columns) + x;
-
+	
 	if (e.shiftKey) {
 		// Toggle Wall
-		if (grid[y][x]) {
-			grid[y][x] = 0;
-			checkShortestPath();
-		}
-		else {
-			grid[y][x] = 1;
-			
-			path.forEach((node) => {
-				if (node.x === x && node.y === y) {
-					checkShortestPath();
-				}
-				else {
-					draw();
-				}
-			});
-		}
-	}
-	else if (e.button === 0) {
-		// Set Start and End Node
-		startPos.x = endPos.x;
-		startPos.y = endPos.y;
-		endPos.x = x;
-		endPos.y = y;
+		if (grid[y][x]) grid[y][x] = 0;
+		else grid[y][x] = 1;
 		checkShortestPath();
 	}
-	else {
+	else if (e.button === 0) {
 		// Set End Node
 		endPos.x = x;
 		endPos.y = y;
 		checkShortestPath();
 	}
 });
+// Right Click
+document.addEventListener("contextmenu", (e) => {
+	e.preventDefault();
+	const bounds = canvas.getBoundingClientRect();
+	const pixelX = e.x - bounds.left;
+	const pixelY = e.y - bounds.top;
+	const x = (pixelX - (pixelX % tilesize)) / tilesize;
+	const y = (pixelY - (pixelY % tilesize)) / tilesize;
+	if (x < 0 || x >= columns || y < 0 || y >= rows) return;
+	
+	// Set Start Node
+	startPos.x = x;
+	startPos.y = y;
+	checkShortestPath();
+});
 
-checkShortestPath();
-
-function checkShortestPath() {
-	path = pathFinder(startPos, endPos, grid);
-	output();
-	draw();
-}
-
-function draw() {
-	for (let y = 0; y < rows; y++) {
-		for (let x = 0; x < rows; x++) {
-			if (x === startPos.x && y === startPos.y) {
-				ctx.fillStyle = '#ff0000';
-			}
-			else if (x === endPos.x && y === endPos.y) {
-				ctx.fillStyle = '#00ff00';
-			}
-			else if (grid[y][x] === 1) {
-				ctx.fillStyle = '#000000';
-			}
-			else {
-				ctx.fillStyle = '#ffffff';
-			}
-
-			// Highlight the path
-			path.forEach((node) => {
-				if (node.x === x && node.y === y && (endPos.x !== x && endPos.y !== y)) {
-					ctx.fillStyle = '#ffff00';
-				}
-			});
-			ctx.fillRect(x * tilesize, y * tilesize, tilesize, tilesize);
-
-			// Draw Grid
-			ctx.strokeStyle = '#000000';
-			ctx.strokeRect(x * tilesize, y * tilesize, tilesize, tilesize);
-		}
-	}
-}
-
-function output() {
-	if (path == null || path.length === 0) {
-		console.log("No path found.");
-	}
-	else {
-		let message = "Shortest Path is: ";
-		path.forEach((node) => {
-			message += `(${node.x},${node.y}), `;
-		});
-		console.log(message);
-	}
-}
+window.onload = checkShortestPath;
