@@ -63,7 +63,7 @@ const draw = () => {
 };
 const checkShortestPath = () => {
 	path = pathFinder(startPos, endPos, grid);
-	output(path);
+	output();
 	draw();
 };
 
