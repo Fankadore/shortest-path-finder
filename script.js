@@ -22,7 +22,7 @@ let path = pathFinder(startPos, endPos, grid);
 const tilesize = 32;
 const columns = grid[0].length;
 const rows = grid.length;
-const canvas = document.querySelector("#grid");
+const canvas = document.querySelector(".grid");
 const ctx = canvas.getContext("2d");
 canvas.setAttribute("width", columns * tilesize);
 canvas.setAttribute("height", rows * tilesize);
